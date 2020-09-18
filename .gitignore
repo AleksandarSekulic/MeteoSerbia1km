@@ -1,3 +1,8 @@
+# Project files
+/plot
+/meteo_scripts
+/data
+
 # History files
 .Rhistory
 .Rapp.history
