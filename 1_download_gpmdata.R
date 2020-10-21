@@ -1,11 +1,7 @@
 library(R.utils)
 library(doParallel)
-#library(RCurl)
 
-# year=2015
-
-wd = '/media/geocomp/060C0FE30C0FCC9D/meteo_serbia/'
-# wd = dirname(rstudioapi::getActiveDocumentContext()$path)
+wd = dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(wd)
 dir.create("imerg")
 setwd("imerg")

@@ -7,39 +7,32 @@ library(raster)
 library(rgdal)
 library(climate)
 library(plyr)
-# find 100 nearest UK stations to longitude 1W and latitude 53N :
 
-wd = "/media/geocomp/060C0FE30C0FCC9D/meteo_serbia/"
-# wd=dirname(rstudioapi::getActiveDocumentContext()$path)
+wd=dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(wd)
 
 borders <- readOGR("borders/osm_nominatim/Polygon.shp")
 border.buffer <- buffer(borders, 2, dissolve=T) # 1.5 degree -> 150 km
 
-# dem and twi #
-dem = crop(raster('../meteo/dem_twi/dem.sdat'), borders)
-dem = mask(dem, borders)
-writeRaster(dem, '../dem_twi/dem.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
-
-twi = crop(raster('../meteo/dem_twi/twi.sdat'), borders)
-twi = mask(twi, borders)
-writeRaster(twi, '../dem_twi/twi.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
-
-dem = crop(raster('../meteo/dem_twi/dem.sdat'), border.buffer)
+# # dem and twi #
+# dem = crop(raster('../meteo/dem_twi/dem.sdat'), borders)
 # dem = mask(dem, borders)
-writeRaster(dem, 'dem_twi/dem_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
-
-twi = crop(raster('../meteo/dem_twi/twi.sdat'), border.buffer)
+# writeRaster(dem, '../dem_twi/dem.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
+# 
+# twi = crop(raster('../meteo/dem_twi/twi.sdat'), borders)
 # twi = mask(twi, borders)
-writeRaster(twi, 'dem_twi/twi_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
+# writeRaster(twi, '../dem_twi/twi.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
+# 
+# dem = crop(raster('../meteo/dem_twi/dem.sdat'), border.buffer)
+# # dem = mask(dem, borders)
+# writeRaster(dem, 'dem_twi/dem_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
+# 
+# twi = crop(raster('../meteo/dem_twi/twi.sdat'), border.buffer)
+# # twi = mask(twi, borders)
+# writeRaster(twi, 'dem_twi/twi_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
 
 
 years <- 2000:2019
-
-# no "15120" 
-# add bulgaria : "15601" "15605" montenegro: "13455" "13464"
-# malo merenja, ne treba
-
 
 countries = c("Serbia", "Hungary", "Romania", "Bulgaria", "Macedonia", "Albania",
               "Montenegro", "Croatia", "Bosnia", "Slovenia", "Austria", "Slovakia") # , "Kosovo"
@@ -103,7 +96,7 @@ plot(border.buffer, add=T)
 # 
 # unique(wmo_year_missing$wmo)
 
-# try by month ############################
+# ### by month ############################
 
 # station_ID
 # Date 
@@ -155,21 +148,15 @@ for (wmo in stations_serbia$wmo_id[1:50]) {
     }
   }
 }
-# [1] 13278 13279 13376 13384 13383 13274 13378 13370 13272 13269 13285 13180 13369 13289
-# [15] 13367 13183 13388 13173 13168 13389 13266 13262 13295 13174 13489 13397 13067 13160
-# [29] 12982 12992 12960 12970 12860 12950 12942 12843 12930 12846 12935 15410 15292 15200
-# [43] 15230 15450 15614 15600 15615 15712 13571 13588
 
 # save(ogimet_serbia_month, file = "ogimet/ogimet_serbia_month.rda")
-load(file = "ogimet/ogimet_serbia_month.rda") # 546706
+load(file = "ogimet/ogimet_serbia_month.rda")
 
 ogimet_serbia <- ogimet_serbia_month
 # save(ogimet_serbia, file = "ogimet/ogimet_serbia.rda")
 load(file = "ogimet/ogimet_serbia.rda")
 
 ogimet_serbia <- ogimet_serbia[!duplicated(ogimet_serbia), ]
-# ogimet_serbia <- ogimet_serbia[!is.na(ogimet_serbia$TemperatureCAvg), ]
-# ogimet_serbia <- ogimet_serbia[order(ogimet_serbia$Date), ]
 
 summary(ogimet_serbia$Date)
 ogimet_serbia$Date <- ogimet_serbia$Date - 1 # because of 00 hour - previous day
@@ -193,10 +180,6 @@ summary(duplicated(ogimet_serbia[, 1:2]))
 duplicates <- ogimet_serbia[duplicated(ogimet_serbia[, 1:2]), ]
 head(duplicates)
 summary(duplicates)
-# unique(ogimet_serbia[duplicated(ogimet_serbia[, 1:2]), ]$Date)
-# ogimet_serbia[ogimet_serbia$station_ID==13376 & ogimet_serbia$Date==as.Date("2018-07-01"), ]
-# ogimet_serbia_dates[ogimet_serbia_dates$station_ID==13279 & ogimet_serbia_dates$Date==as.Date("2000-12-01"), ]
-# ogimet_serbia_month[ogimet_serbia_month$station_ID==13279 & ogimet_serbia_month$Date==as.Date("2000-12-01"), ]
 ogimet_serbia <- ogimet_serbia[!duplicated(ogimet_serbia[, 1:2]), ] # 533595
 # save(ogimet_serbia, file = "ogimet/ogimet_serbia.rda")
 load(file = "ogimet/ogimet_serbia.rda")
@@ -247,7 +230,7 @@ for (wmo in unique(wmo_dates_missing$wmo)) {
       if(length(ogimet_serbia_dates) == length(wmo_date)) {
         ogimet_serbia_dates <- rbind(ogimet_serbia_dates, wmo_date)
       } else {
-        print("NECE!!!")
+        print("It doesn't work!!!")
       }
     }
   }

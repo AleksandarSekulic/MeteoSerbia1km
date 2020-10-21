@@ -19,8 +19,6 @@ for (user in users) {
   login <- POST("https://oauth.fieldclimate.com/token", content_type_json(), body = body)
   token <- content(login)$access_token
   
-  # body = paste('{"authorization": "Bearer ', token, '"}', sep="")
-  # stations <- GET("https://api.fieldclimate.com/v2/user/stations", content_type_json(), body = body)
   station_request <- GET("https://api.fieldclimate.com/v2/user/stations",
                   add_headers("Authorization" = paste("Bearer", token, sep = " ")))
                   # authenticate(user, "pis"))
@@ -91,8 +89,6 @@ for (st in 1:nrow(stations)) {
                                                                        "sensor_x_x_22_506_mx",
                                                                        "sensor_x_x_22_506_mn",
                                                                        "sensor_x_x_5_6_s")])
-  # aaa <- sapply(station.df, function(x) length(x))
-  # summary(aaa)
   station.df <- do.call("rbind", station.df)
   # head(station.df)
   
@@ -188,12 +184,7 @@ for(o in 1:nrow(asv.df_test)) {
         break
       }
     }
-    
   }
-  
-  
-  
-  
 }
 
 br # 634 out
@@ -211,20 +202,15 @@ stations[stations$id==asv.df[which.max(asv.df$tmax), "id"], ]
 
 save(asv.df, file="ogimet/asv_df.rda")
 
-
-
-
-
-
-# https://oauth.fieldclimate.com/token
-# https://api.fieldclimate.com/v2/user/stations
-# do 2019-12-31 -> 1577750400
-as.Date("2019-12-31") - as.Date("2005-03-08") # 5411
-1577750400-1110240000 # 467510400
-467510400/5411 # 86400 # 60*60*24
-1577750400-(as.Date("2019-12-31")-as.Date("2005-03-08"))*60*60*24
-# 2000-01-01 -> 946684800
-as.Date("2019-12-31") - as.Date("2000-01-01") # 7304
-1577750400-7304*60*60*24
-# https://api.fieldclimate.com/v2/view/fc/00000A1E/from/1110240000/to/1577750400
-# https://api.fieldclimate.com/v2/view/fc/00000A1E/from/946684800/to/1577750400
+# # https://oauth.fieldclimate.com/token
+# # https://api.fieldclimate.com/v2/user/stations
+# # do 2019-12-31 -> 1577750400
+# as.Date("2019-12-31") - as.Date("2005-03-08") # 5411
+# 1577750400-1110240000 # 467510400
+# 467510400/5411 # 86400 # 60*60*24
+# 1577750400-(as.Date("2019-12-31")-as.Date("2005-03-08"))*60*60*24
+# # 2000-01-01 -> 946684800
+# as.Date("2019-12-31") - as.Date("2000-01-01") # 7304
+# 1577750400-7304*60*60*24
+# # https://api.fieldclimate.com/v2/view/fc/00000A1E/from/1110240000/to/1577750400
+# # https://api.fieldclimate.com/v2/view/fc/00000A1E/from/946684800/to/1577750400
