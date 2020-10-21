@@ -2,6 +2,7 @@
 /plot
 /meteo_scripts
 /data
+/ogimet/model*
 
 # History files
 .Rhistory
