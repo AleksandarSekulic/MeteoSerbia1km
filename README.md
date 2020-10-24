@@ -2,6 +2,8 @@
 
 This repository contains scripts and data used in the manuscript "A high-resolution daily gridded meteorological dataset for Serbia made by Random Forest Spatial Interpolation" by Sekulić A., Kilibarda M., Protić D. and Bajat B., that was submitted to the Scientific Data journal in October 2020.
 
+## Overview
+
 MeteoSerbia1km is the first daily gridded meteorological dataset at a 1-km spatial resolution across Serbia for the 2000–2019 period. The dataset consists of five daily variables: maximum, minimum and mean temperature, mean sea level pressure, and total precipitation. Besides daily summaries, it contains monthly and annual summaries, daily, monthly, and annual long term means (LTM).
 
 ## Data download
