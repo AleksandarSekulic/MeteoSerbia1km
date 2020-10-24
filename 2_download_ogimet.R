@@ -24,11 +24,11 @@ border.buffer <- buffer(borders, 2, dissolve=T) # 1.5 degree -> 150 km
 # writeRaster(twi, '../dem_twi/twi.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
 # 
 # dem = crop(raster('../meteo/dem_twi/dem.sdat'), border.buffer)
-# # dem = mask(dem, borders)
+# # dem = mask(dem, border.buffer)
 # writeRaster(dem, 'dem_twi/dem_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
 # 
 # twi = crop(raster('../meteo/dem_twi/twi.sdat'), border.buffer)
-# # twi = mask(twi, borders)
+# # twi = mask(twi, border.buffer)
 # writeRaster(twi, 'dem_twi/twi_buff.tif', "GTiff",NAflag= -32767, datatype='INT2S', overwrite=T)
 
 
