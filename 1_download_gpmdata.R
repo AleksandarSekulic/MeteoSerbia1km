@@ -23,7 +23,7 @@ foreach(i = 1:daysNum, .packages = c('R.utils')) %dopar% {
 # for(i in c(1:daysNum)) {
     #Sys.sleep(5)
   n_30 = sprintf("%04d", as.numeric(strftime(time[i], format = "%j")) * 30 - 30)
-  url = paste('ftp://aleksandarsale.sekulic%40gmail.com:aleksandarsale.sekulic%40gmail.com@arthurhou.pps.eosdis.nasa.gov/gpmallversions/',
+  url = paste('https://aleksandarsale.sekulic%40gmail.com:aleksandarsale.sekulic%40gmail.com@arthurhouhttps.pps.eosdis.nasa.gov/gpmallversions/',
               substr(version, 1,3), '/', substr(days[i], 1, 4), '/', substr(days[i], 5, 6), '/', substr(days[i], 7, 8), '/gis/',
               '3B-DAY-GIS.MS.MRG.3IMERG.', days[i], '-S000000-E235959.', n_30, '.', version,'.zip', sep = '')
   # url = paste('ftp://aleksandarsale.sekulic%40gmail.com:aleksandarsale.sekulic%40gmail.com@jsimpson.pps.eosdis.nasa.gov/data/imerg/gis/'

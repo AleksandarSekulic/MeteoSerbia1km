@@ -118,7 +118,7 @@ plot(border.buffer, add=T)
 
 ogimet_serbia_month <- as.data.frame(matrix(nrow = 0, ncol=18))
 wmo_month_missing <- as.data.frame(matrix(nrow = 0, ncol=3))
-for (wmo in stations_serbia$wmo_id[1:50]) {
+for (wmo in stations_serbia$wmo_id) {
   for (year in years){
     for (month in sprintf("%02d", 1:12)) {
       if (month != "12") {
@@ -141,7 +141,7 @@ for (wmo in stations_serbia$wmo_id[1:50]) {
         if(length(ogimet_serbia_month) == length(wmo_month)) {
           ogimet_serbia_month <- rbind(ogimet_serbia_month, wmo_month)
         } else {
-          print("NECE!!!")
+          print("It doesn't work!!!")
         }
         
       }
@@ -172,8 +172,8 @@ load(file = "ogimet/ogimet_serbia.rda")
 
 ### remove all na
 # summary(is.na(ogimet_serbia$TemperatureCAvg))
-summary(!rowSums(is.na(ogimet_serbia[, c(3:5,14,16)])) == ncol(ogimet_serbia[, c(3:5,14,16)]))
-ogimet_serbia <- ogimet_serbia[!(rowSums(is.na(ogimet_serbia[, c(3:5,14,16)])) == ncol(ogimet_serbia[, c(3:5,14,16)])), ] # 533747
+summary(!rowSums(is.na(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])) == ncol(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")]))
+ogimet_serbia <- ogimet_serbia[!(rowSums(is.na(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])) == ncol(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])), ] # 533747
 
 summary(duplicated(ogimet_serbia))
 summary(duplicated(ogimet_serbia[, 1:2]))
@@ -186,9 +186,9 @@ load(file = "ogimet/ogimet_serbia.rda")
 
 ###
 # try by day
-all.dates <- as.character(seq(as.Date("2000-01-01"), as.Date("2019-12-31"), by="day"))
+all.dates <- as.character(seq(as.Date(paste(year[1], "-01-01", sep="")), as.Date(paste(year[length(years)], "-12-31", sep="")), by="day"))
 wmo_dates_missing <- as.data.frame(matrix(nrow = 0, ncol=2))
-for (wmo in stations_serbia$wmo_id) {
+for (wmo in unique(ogimet_serbia$wmo_id)) {
   df_dates <- unique(as.character(ogimet_serbia[ogimet_serbia$station_ID==wmo, "Date"]))
   dif_dates <- setdiff(all.dates, df_dates)
   if(length(dif_dates) !=0) {
@@ -223,6 +223,8 @@ for (wmo in unique(wmo_dates_missing$wmo)) {
                                  hour = hour))
     if(inherits(wmo_date, "try-error")) {
       # wmo_month_missing <- rbind(wmo_month_missing, c(wmo, year, month))
+    } else if(nrow(wmo_date)==0) {
+      
     } else {
       if (add==1){
         wmo_date$Date <- wmo_date$Date-1
@@ -237,6 +239,22 @@ for (wmo in unique(wmo_dates_missing$wmo)) {
 }
 # save(ogimet_serbia_dates, file = "ogimet/ogimet_serbia_dates.rda")
 load(file = "ogimet/ogimet_serbia_dates.rda")
-summary(duplicated(ogimet_serbia_dates[, 1:2]))
-
 load(file = "ogimet/ogimet_serbia.rda")
+
+summary(duplicated(ogimet_serbia_dates[, 1:2]))
+ogimet_serbia_dates <- ogimet_serbia_dates[, names(ogimet_serbia)]
+ogimet_serbia <- rbind(ogimet_serbia, ogimet_serbia_dates)
+
+summary(duplicated(ogimet_serbia))
+summary(duplicated(ogimet_serbia[, 1:2]))
+duplicates <- ogimet_serbia[duplicated(ogimet_serbia[, 1:2]), ]
+head(duplicates)
+summary(duplicates)
+ogimet_serbia <- ogimet_serbia[!duplicated(ogimet_serbia[, 1:2]), ] # 533595
+
+summary(!rowSums(is.na(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])) == 
+          ncol(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")]))
+ogimet_serbia <- ogimet_serbia[!(rowSums(is.na(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])) ==
+                                   ncol(ogimet_serbia[, c("TemperatureCAvg", "TemperatureCMax", "TemperatureCMin", "PresslevHp", "Precmm")])), ]
+
+# save(ogimet_serbia, file = "ogimet/ogimet_serbia.rda")
