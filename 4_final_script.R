@@ -1,5 +1,5 @@
 library(devtools)
-devtools::install_github("AleksandarSekulic/Rmeteo/pkg")
+devtools::install_github("AleksandarSekulic/Rmeteo")
 # install.packages("meteo", repos="http://R-Forge.R-project.org")
 library(meteo)
 
@@ -27,6 +27,7 @@ library(maps)
 #devtools::install_github("eliocamp/ggnewscale")
 library(ggnewscale)
 
+# repeat code for each variable!
 var = "tmax"
 # var = "tmin"
 # var = "tmean"
@@ -98,8 +99,11 @@ summary(as.factor(serbia))
 stations_serbia = stations_serbia[serbia != 0, ] # 93 stations
 stations_serbia$wmo_id <- as.numeric(as.character(stations_serbia$wmo_id))
 stations_serbia$station_names <- as.character(stations_serbia$station_names)
-ogimet_serbia <- ogimet_serbia[ogimet_serbia$station_ID %in% stations_serbia$wmo_id, ]
+names(stations_serbia)[1] <- "station_ID"
+ogimet_serbia <- ogimet_serbia[ogimet_serbia$station_ID %in% stations_serbia$station_ID, ]
 ogimet_serbia <- ogimet_serbia[order(ogimet_serbia$Date, ogimet_serbia$station_ID), ]
+
+ogimet_serbia <- join(ogimet_serbia, stations_serbia, by="station_ID")
 
 # save(ogimet_serbia, file="ogimet/ogimet_serbia08.rda")
 load(file="ogimet/ogimet_serbia08.rda")
@@ -345,10 +349,44 @@ eobs <- unlist(eobs)
 summary(eobs)
 ogimet_serbia$eobs <- eobs
 
-ogimet_serbia <- ogimet_serbia[complete.cases(ogimet_serbia), ]
+# ogimet_serbia <- ogimet_serbia[complete.cases(ogimet_serbia), ]
 # save(ogimet_serbia, file = paste("ogimet/ogimet_serbia08_", var, ".rda", sep=""))
 
+
+### TPS ##############################
+
+load(file = paste("ogimet/ogimet_serbia08_", var, ".rda", sep=""))
+
+dates <- as.character(sort(unique(ogimet_serbia$date)))
+r <- raster("dem_twi/dem_buff.tif")
+
+tps.df <- 13
+
+registerDoParallel(cores=detectCores())
+tps <- foreach(date = dates, .packages = c("RSAGA", "raster","spacetime","gstat","rgdal","raster","doParallel","meteo")) %dopar% {
+  day.ogimet <- ogimet_serbia[ogimet_serbia$date == date, ]
+  coordinates(day.ogimet) <- c("lon", "lat")
+  day.ogimet@proj4string <- wgs84
+  if ((nrow(day.ogimet)-3) <= tps.df) {
+    tps.df.day <- nrow(day.ogimet)-3
+  } else {
+    tps.df.day <- tps.df
+  }
+  m <- Tps(coordinates(day.ogimet), as.data.frame(day.ogimet)[, var], lon.lat = T,
+           # lambda = 20)
+           df=tps.df.day)
+  tps <- as.vector(m$fitted.values)
+  return(tps)
+}
+stopImplicitCluster()
+
+tps = unlist(tps)
+ogimet_serbia$tps <- tps
+
+save(ogimet_serbia, file = paste("ogimet/ogimet_serbia08_", var, ".rda", sep=""))
+
 ### Outliers detection ##############################################
+# not for SLP #
 
 load(file = paste("ogimet/ogimet_serbia08_", var, ".rda", sep=""))
 
@@ -427,7 +465,9 @@ ogimet_serbia[which.max(ogimet_serbia[, var]-ogimet_serbia$tps), ]
 
 ### Save the data ###
 
-ogimet_serbia <- ogimet_serbia[complete.cases(ogimet_serbia), ]
+if (var!="slp") {
+  ogimet_serbia <- ogimet_serbia[complete.cases(ogimet_serbia), ]
+}
 
 cor(ogimet_serbia[, var], ogimet_serbia$eobs) # gtt # imerg
 
@@ -848,6 +888,16 @@ mean(abs(cv.model$obs - cv.model$pred), na.rm=TRUE)
 
 load(file = paste("ogimet/ogimet_serbia08_", var, ".rda", sep=""))
 
+# get variable specific columns
+if (var == "tmax" | var == "tmin" | var == "tmean"){
+  frm <- paste(var, ' ~ dem + twi + gtt + doy', sep='') # + cdate 
+} else if (var == "slp") {
+  frm <- paste(var, ' ~ dem + doy', sep='') # + cdate
+} else if (var == "prcp") {
+  frm <- paste(var, ' ~ dem + doy + imerg + tmax + tmin + slp', sep='') # + cdate
+  frm.cl <- "prcp_cl ~ dem + doy + imerg + tmax + tmin + slp" # + cdate
+}
+
 if (var=="prcp") {
   load(file=paste('ogimet/tuned2_', var, '_cl.rda', sep=''))
   params <- tuned.model.cl$tuned.parameters
@@ -855,15 +905,13 @@ if (var=="prcp") {
                          data = ogimet_serbia,
                          data.staid.x.y.time = c(1,4,3,6),
                          zero.tol=0,
-                         n.obs= params$n.obs,
+                         n.obs = params$n.obs,
                          mtry=params$mtry,
                          sample.fraction=params$sample.fraction,
                          min.node.size=params$min.node.size,
                          num.trees=params$num.trees,
                          s.crs=wgs84,
                          t.crs=utm34,
-                         use.idw = T,
-                         idw.p = 3,
                          cpus=detectCores()-1,
                          progress=TRUE,
                          importance = 'impurity',
